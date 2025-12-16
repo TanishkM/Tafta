@@ -1,7 +1,7 @@
 package org.example.Producer;
 
 import org.example.Topic;
-import org.example.TopicRegistry;
+import org.example.TempBrokers.TopicRegistry;
 
 public class SimpleProducer implements Producer {
 
