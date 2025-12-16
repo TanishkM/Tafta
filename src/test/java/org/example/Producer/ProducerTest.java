@@ -3,35 +3,58 @@ package org.example.Producer;
 import org.example.Message;
 import org.example.Topic;
 import org.example.TempBrokers.TopicRegistry;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public class ProducerTest {
 
-    public static void main(String[] args) {
-        TopicRegistry registry = new TopicRegistry();
+    private TopicRegistry registry;
+    private Producer producer;
+
+    @Before
+    public void setUp() {
+        registry = new TopicRegistry();
         registry.createTopic("payments", 2);
+        producer = new SimpleProducer(registry);
+    }
 
-        Producer producer = new SimpleProducer(registry);
-
+    @Test
+    public void testProducerSendsMessages() {
         producer.send("payments", "user1".getBytes(), "p1".getBytes());
         producer.send("payments", "user1".getBytes(), "p2".getBytes());
         producer.send("payments", null, "p3".getBytes());
 
         Topic topic = registry.getTopic("payments");
+        assertNotNull("Topic should exist", topic);
+
+        int totalMessages = 0;
+        boolean foundP1 = false, foundP2 = false, foundP3 = false;
 
         for (int i = 0; i < topic.getPartitionCount(); i++) {
             List<Message> messages = topic.read(i, 0);
+            totalMessages += messages.size();
+
             for (Message msg : messages) {
-                System.out.printf(
-                        "Partition %d Offset %d Value %s%n",
-                        i,
-                        msg.getOffset(),
-                        new String(msg.getValue())
-                );
+                String value = new String(msg.getValue());
+                if (value.equals("p1"))
+                    foundP1 = true;
+                if (value.equals("p2"))
+                    foundP2 = true;
+                if (value.equals("p3"))
+                    foundP3 = true;
+
+                // Verify offset is valid
+                assertTrue("Offset should be non-negative", msg.getOffset() >= 0);
             }
         }
 
-        System.out.println("Producer test passed");
+        assertEquals("Should have 3 total messages", 3, totalMessages);
+        assertTrue("Should have message 'p1'", foundP1);
+        assertTrue("Should have message 'p2'", foundP2);
+        assertTrue("Should have message 'p3'", foundP3);
     }
 }

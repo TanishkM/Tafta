@@ -1,9 +1,15 @@
 package org.example;
 
+import org.junit.Test;
+
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 public class TopicTest {
-    public static void main(String[] args) {
+
+    @Test
+    public void testTopicPublishAndRead() {
         Topic topic = new Topic("orders", 3);
 
         // produce messages
@@ -12,20 +18,36 @@ public class TopicTest {
         topic.publish(null, "order3".getBytes());
         topic.publish(null, "order4".getBytes());
 
+        assertEquals("Topic should have 3 partitions", 3, topic.getPartitionCount());
+
+        int totalMessages = 0;
+        boolean foundOrder1 = false, foundOrder2 = false, foundOrder3 = false, foundOrder4 = false;
+
         // read all partitions
         for (int i = 0; i < topic.getPartitionCount(); i++) {
             List<Message> messages = topic.read(i, 0);
+            totalMessages += messages.size();
+
             for (Message msg : messages) {
-                System.out.printf(
-                        "Partition %d Offset %d Value %s%n",
-                        i,
-                        msg.getOffset(),
-                        new String(msg.getValue())
-                );
+                String value = new String(msg.getValue());
+                if (value.equals("order1"))
+                    foundOrder1 = true;
+                if (value.equals("order2"))
+                    foundOrder2 = true;
+                if (value.equals("order3"))
+                    foundOrder3 = true;
+                if (value.equals("order4"))
+                    foundOrder4 = true;
+
+                // Verify offset is valid
+                assertTrue("Offset should be non-negative", msg.getOffset() >= 0);
             }
         }
 
-        System.out.println("Topic test passed");
+        assertEquals("Should have 4 total messages", 4, totalMessages);
+        assertTrue("Should have message 'order1'", foundOrder1);
+        assertTrue("Should have message 'order2'", foundOrder2);
+        assertTrue("Should have message 'order3'", foundOrder3);
+        assertTrue("Should have message 'order4'", foundOrder4);
     }
 }
-
