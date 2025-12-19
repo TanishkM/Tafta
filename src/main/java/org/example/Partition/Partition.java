@@ -1,4 +1,6 @@
-package org.example;
+package org.example.Partition;
+
+import org.example.Message;
 
 import java.util.ArrayList;
 import java.util.List;

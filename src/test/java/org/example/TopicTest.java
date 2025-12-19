@@ -2,6 +2,7 @@ package org.example;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -9,7 +10,7 @@ import static org.junit.Assert.*;
 public class TopicTest {
 
     @Test
-    public void testTopicPublishAndRead() {
+    public void testTopicPublishAndRead() throws IOException {
         Topic topic = new Topic("orders", 3);
 
         // produce messages

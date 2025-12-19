@@ -8,6 +8,7 @@ import org.example.TempBrokers.TopicRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -19,7 +20,7 @@ public class ConsumerTest {
         private ConsumerOffsetStore offsetStore;
 
         @Before
-        public void setUp() {
+        public void setUp() throws IOException {
                 registry = new TopicRegistry();
                 registry.createTopic("logs", 2);
                 producer = new SimpleProducer(registry);
@@ -27,7 +28,7 @@ public class ConsumerTest {
         }
 
         @Test
-        public void testConsumerPolling() {
+        public void testConsumerPolling() throws IOException {
                 // Produce initial messages
                 producer.send("logs", null, "a".getBytes());
                 producer.send("logs", null, "b".getBytes());

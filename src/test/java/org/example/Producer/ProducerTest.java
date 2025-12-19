@@ -6,6 +6,7 @@ import org.example.TempBrokers.TopicRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -16,14 +17,14 @@ public class ProducerTest {
     private Producer producer;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         registry = new TopicRegistry();
         registry.createTopic("payments", 2);
         producer = new SimpleProducer(registry);
     }
 
     @Test
-    public void testProducerSendsMessages() {
+    public void testProducerSendsMessages() throws IOException {
         producer.send("payments", "user1".getBytes(), "p1".getBytes());
         producer.send("payments", "user1".getBytes(), "p2".getBytes());
         producer.send("payments", null, "p3".getBytes());
