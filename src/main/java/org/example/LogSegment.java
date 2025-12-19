@@ -1,6 +1,4 @@
-package org.example.Consumer;
-
-import org.example.Message;
+package org.example;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,4 +75,12 @@ public class LogSegment {
     public long getSize(){
         return size;
     }
+    public long lastModifiedTime() {
+        return file.lastModified();
+    }
+
+    public File getFile() {
+        return file;
+    }
+
 }

@@ -1,6 +1,8 @@
 package org.example.Partition;
-import org.example.Consumer.LogSegment;
+import org.example.LogSegment;
 import org.example.Message;
+import org.example.Retention.RetentionContext;
+import org.example.Retention.RetentionPolicy;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,4 +100,29 @@ public class SegmentedPartition {
         buffer.flip();
         return buffer;
     }
+    public synchronized void cleanup(RetentionPolicy policy) {
+        if (segments.size() <= 1) return;
+
+        long totalSize = segments.stream()
+                .mapToLong(LogSegment::getSize)
+                .sum();
+
+        RetentionContext context = new RetentionContext(totalSize);
+
+        List<LogSegment> toRemove = new ArrayList<>();
+
+        for (int i = 0; i < segments.size() - 1; i++) { // exclude active
+            LogSegment segment = segments.get(i);
+
+            if (policy.shouldDelete(segment, context)) {
+                totalSize -= segment.getSize();
+                segment.getFile().delete();
+                toRemove.add(segment);
+
+                context = new RetentionContext(totalSize);
+            }
+        }
+        segments.removeAll(toRemove);
+    }
+
 }
