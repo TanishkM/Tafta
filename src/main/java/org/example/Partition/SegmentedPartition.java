@@ -72,9 +72,7 @@ public class SegmentedPartition {
     public synchronized List<Message> readFromOffset(long offset) throws IOException {
         List<Message> result = new ArrayList<>();
         for (LogSegment segment : segments) {
-            if (segment.getBaseOffset() >= offset) {
-                result.addAll(segment.readFromOffset(offset));
-            }
+            result.addAll(segment.readFromOffset(offset));
         }
         return result;
     }

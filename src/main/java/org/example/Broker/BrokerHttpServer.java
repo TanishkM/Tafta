@@ -1,6 +1,8 @@
 package org.example.Broker;
 
 import com.sun.net.httpserver.HttpServer;
+import org.example.Handlers.OffsetHandler;
+import org.example.Handlers.TopicHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,6 +16,7 @@ public class BrokerHttpServer {
         this.broker = broker;
         this.server = HttpServer.create(new InetSocketAddress(port),0);
         server.createContext("/topics", new TopicHandler(broker));
+        server.createContext("/offsets", new OffsetHandler(broker));
         server.setExecutor(Executors.newCachedThreadPool());
     }
     public void start(){

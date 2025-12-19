@@ -1,7 +1,8 @@
-package org.example.Broker;
+package org.example.Handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.example.Broker.SimpleBroker;
 import org.example.Message;
 
 import java.io.IOException;
@@ -47,7 +48,8 @@ public class TopicHandler implements HttpHandler {
 
         String key = extractJsonField(body, "key");
         String value = extractJsonField(body, "value");
-
+        System.out.println("Producing message to topic " + topic +
+                " with key: " + key + " and value: " + value);
         broker.send(
                 topic,
                 key != null ? key.getBytes() : null,
@@ -65,6 +67,7 @@ public class TopicHandler implements HttpHandler {
         long start = System.currentTimeMillis();
 
         while (true) {
+            System.out.println("Polling for messages at offset " + offset);
             var messages = broker.poll("client", topic, partition, offset);
             if (!messages.isEmpty()) {
                 send(exchange, 200, serialize(messages));
@@ -85,13 +88,15 @@ public class TopicHandler implements HttpHandler {
             throws IOException {
 
         byte[] bytes = response.getBytes();
-        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        System.out.println("Sending response: " + response);
+        exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(status, bytes.length);
 
         try (var os = exchange.getResponseBody()) {
             os.write(bytes);
         }
     }
+
     private long parseOffset(String query) {
         if (query == null) return 0;
 
